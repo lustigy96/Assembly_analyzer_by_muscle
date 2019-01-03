@@ -3,7 +3,7 @@ import random
 import MuscleRunner
 import math
 
-#merge the strings comes out of muscle rightly,
+#merge the 2-strings comes out of muscle rightly,
 # return the result if the overlap is good enough, otherwise: return -1
 def mergeOverlapStrings(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
 
@@ -65,7 +65,8 @@ def mergeOverlapStrings(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
         result = -1.0 * tot_overlap / min(letters_num1, letters_num1)
     return result  # =merged\-1 for badspace\ -2 for unmatched
 
-#unite the overlapped strings and return 2-dim array with the strings
+# unite the overlapped strings BY CALLING MUSCLE and return 2-dim array with the strings
+# USES: mergeOverlapStrings
 def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_to_flip):
     unite_array=[]
     is_united=False
@@ -106,6 +107,8 @@ def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_t
 
     return filterSubstring(unite_array,prob_to_flip), is_united
 
+# filter the substrings in arr
+# USES: is_substring_one2zero
 def filterSubstring(arr,prob2flip):
     filter_ind=[]
     arr.sort(lambda x,y: cmp(len(x), len(y)))
@@ -125,6 +128,7 @@ def filterSubstring(arr,prob2flip):
     map(lambda x: arr.pop(x), sorted(filter_ind, key=lambda x: -x))
     return arr
 
+# return true only if sub is a substing og st EXACTLY
 def is_substring(sub, st):
     ans=False
     if len(sub)>len(st):
@@ -139,6 +143,7 @@ def is_substring(sub, st):
             ans=True
     return ans
 
+#return true and the fixed string: if sub is a substring of st WITH SOME FLIPS
 def is_substring_one2zero(sub, st,prob2flip):
     ans=False
     count_err=0
@@ -158,17 +163,19 @@ def is_substring_one2zero(sub, st,prob2flip):
             return True,s
     return False,-1
 
-def calc_error_val(s1,s2):
+#count errors between s1, s2
+def caunt_error_val(s1,s2):
     count =0;
     for x, y in zip(s1,s2):
         if x!=y: count+=1
     return count
 
-def my_merger_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
+#cat 2 strings -> min error and max overlap (priority to min errors)
+def my_cat_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
     min_err_ind=-1
     min_count_err=max(len(first),len(second))
     for i in range(len(first)-minOverlap_bits):
-        tmp=(calc_error_val(first[i:], second))
+        tmp=(caunt_error_val(first[i:], second))
         if tmp<=math.ceil(2*prob2flip*min(len(first)-i,len(second)))and tmp<min_count_err:
             min_err_ind, min_count_err=i, tmp
     if min_err_ind==-1:
@@ -176,6 +183,7 @@ def my_merger_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
     return min_err_ind,tmp
 
 #try to merge all the strings in substrings, and return the all final fregments results
+# USES: my_cat_2string
 def my_merger(substrings,minOverlap_bits,prob2flip,sourceLen,constlen):
     # # filter the strings with constLen - MAYBE FROM SOME SPESIFIC LEN AND UNDER IT
     # substrings = [k for k in substrings if len(k)>constlen*sourceLen]
@@ -194,8 +202,8 @@ def my_merger(substrings,minOverlap_bits,prob2flip,sourceLen,constlen):
         booli=False
 
         for i in range(len(other)): #try to append substring to res
-            ind1, error1 = my_merger_2string(res, other[i], minOverlap_bits,prob2flip,sourceLen)
-            ind2, error2 = my_merger_2string(other[i], res, minOverlap_bits,prob2flip,sourceLen)
+            ind1, error1 = my_cat_2string(res, other[i], minOverlap_bits,prob2flip,sourceLen)
+            ind2, error2 = my_cat_2string(other[i], res, minOverlap_bits,prob2flip,sourceLen)
             if ind1 > 0 or ind2 > 0:
                 if error1 < error2:
                     print ind1
@@ -214,17 +222,18 @@ def my_merger(substrings,minOverlap_bits,prob2flip,sourceLen,constlen):
     all_final.append(res)
     return all_final
 
-#put arr in muscle and merge the output with merge_all
+#put arr in muscle and merge the output
+# USES: merge_mus_all_output
 def mus_all(arr,f_strings):
     results=MuscleRunner.muscleCall(arr)
     f_strings.write("final by muscle:\n")
-    res_all=merge_all(results)
+    res_all=merge_mus_all_output(results)
     res_all=''.join(res_all)
     f_strings.write(res_all+"\n\n")
     for r in results: f_strings.write(''.join(r)+"\n")
 
-#used to merge the output of muscle- for a lot of strings
-def merge_all(arr):#calc the final string out of samples in arr, fix: 1 to 0
+#used to merge the output of muscle - for a lot of strings
+def merge_mus_all_output(arr):#calc the final string out of samples in arr, fix: 1 to 0
     length=[]; res=[]; i=-1
     for line in arr: length.append(len(line))
     if length==[]:
