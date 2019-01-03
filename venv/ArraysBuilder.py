@@ -29,13 +29,14 @@ def flipsOnArr(arr,probToFlip):
 
 #make flips on 2-dim array with probability=probToFlip (ONLY ON ZEROS)
 def flipsOnArr_zeros(arr,probToFlip):
-    arr=list(arr)
+    arr=list(arr);
     for x in range(len(arr)):
         for i in range(len(arr[x])):
             if arr[x][i]=='0':
                 r=random.uniform(0,1);
                 if r<probToFlip:
                     arr[x] = arr[x][:i] + '1' + arr[x][i + 1:]
+                    print r
     # arr = ''.join(arr)
     return arr;
 
