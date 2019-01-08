@@ -54,10 +54,10 @@ def mergeOverlapStrings(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
                 tot_overlap+=1
 
     tot_overlap-=max(tmp_space1,tmp_space2)
-    if(badspace1)>math.ceil(prob_to_flip*letters_num1) or (badspace2)>math.ceil(prob_to_flip*letters_num2):
+    if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
     # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
         return -1
-    if (1.0 * flips/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
+    if (1.0 * (flips+badspace1+badspace2)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
         return -1-(1.0 * flips /tot_overlap)
     if (1.0 * tot_overlap) / min(letters_num1, letters_num1) >= overlap_treshold:
         result = ''.join(result)
@@ -94,10 +94,10 @@ def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_t
                     f_strings.write(str(i) + ":\t" + ''.join(results[0]) + "\n")
                     f_strings.write(str(ind) + ":\t" + ''.join(results[1]) + "\n\n")
                     unite_array.append(r)
-                else: #print the anacceptable
-                    f_strings.write(str(i) + ":" + str(ind) + ":\tXXX:"+str(r)+"\n")
-                    f_strings.write(str(i)+":\t" + ''.join(results[0]) + "\n")
-                    f_strings.write(str(ind)+":\t" + ''.join(results[1]) + "\n\n")
+                # else: #print the anacceptable
+                #     f_strings.write(str(i) + ":" + str(ind) + ":\tXXX:"+str(r)+"\n")
+                #     f_strings.write(str(i)+":\t" + ''.join(results[0]) + "\n")
+                #     f_strings.write(str(ind)+":\t" + ''.join(results[1]) + "\n\n")
             if len(results) > 2:
                 f_strings.write("~~~~~~~~~~~~~~~~~EROR-0~~~~~~~~~~~~~~~~~~\n")
 
@@ -173,10 +173,11 @@ def caunt_error_val(s1,s2):
 #cat 2 strings -> min error and max overlap (priority to min errors)
 def my_cat_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
     min_err_ind=-1
+    minOverlap_bits=int(math.floor(0.25*min(len(first),len(second))))
     min_count_err=max(len(first),len(second))
     for i in range(len(first)-minOverlap_bits):
         tmp=(caunt_error_val(first[i:], second))
-        if tmp<=math.ceil(2*prob2flip*min(len(first)-i,len(second)))and tmp<min_count_err:
+        if tmp<math.ceil(1.5*prob2flip*min(len(first)-i,len(second)))and tmp<min_count_err:
             min_err_ind, min_count_err=i, tmp
     if min_err_ind==-1:
         return min_err_ind, max(first,second)

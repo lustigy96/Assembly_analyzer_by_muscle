@@ -31,8 +31,8 @@ sourceString=''.join(sourceString)
 prob2flip=0.1
 # sourceString="10001001100110001101011011010110100100010010001001010101110000001111000001010001011000100000000100100001000001101011010000110010101110001011110100011001010100111100010101110011101110100001111111011010"
 # f_strings.write("source:\n"+sourceString)
-constlen=0.3
-substrings0=ArraysBuilder.randomSample_constLen(sourceString,parts=30,constlen=constlen)
+constlen=0.07
+substrings0=ArraysBuilder.randomSample_constLen(sourceString,parts=250,constlen=constlen)
 f_strings.write("\nlevel-0:\n")
 dim2_arr2file(substrings0,f_strings)
 
@@ -59,7 +59,7 @@ while(unit_by_mus):
     if itr==8:
         x=1
 f_strings.write("\nsource:\n"+sourceString)
-res= MERGER.my_merger(substrings0,minOverlap_bits=25,prob2flip=prob2flip,sourceLen=len(sourceString),constlen=constlen)
+res= MERGER.my_merger(substrings0,minOverlap_bits=17,prob2flip=prob2flip,sourceLen=len(sourceString),constlen=constlen) #25 for 0.3 in 200
 f_strings.write("\nmy merge:\n")
 for r in res: f_strings.write(r+"\n")
 f_strings.close()
