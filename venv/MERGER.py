@@ -66,12 +66,6 @@ def mergeOverlapStrings_flips(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
             result = -1.0 * tot_overlap / min(letters_num1, letters_num2)
         return result  # =merged\-1 for badspace\ -2 for unmatched
 
-def mergeOverlapStrings_del(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
-
-
-
-
-
 # unite the overlapped strings BY CALLING MUSCLE and return 2-dim array with the strings
 # USES: mergeOverlapStrings_flips
 def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_to_flip):
@@ -94,7 +88,8 @@ def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_t
                 continue
             results = MuscleRunner.muscleCall(arr2run)
             if len(results) == 2:
-                if DEFINES.FLIP_MOD: r = mergeOverlapStrings_flips(results[0], results[1],overlap_treshold,prob_to_flip,sourceLen)
+                # if DEFINES.FLIP_MOD: r = mergeOverlapStrings_flips(results[0], results[1],overlap_treshold,prob_to_flip,sourceLen)
+                r = mergeOverlapStrings_flips(results[0], results[1],overlap_treshold,prob_to_flip,sourceLen)
                 if r >= 0:
                     is_united=True
                     merged_str[i]=True

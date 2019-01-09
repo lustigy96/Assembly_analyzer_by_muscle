@@ -20,7 +20,7 @@ def makeMATLAB(fileName,listList,minX,maxX, minY,maxY,xlabel,ylabel,zlabel, gapX
     """
     # this code make anylezation of the muscle tool using MATLAB
     #https://stackoverflow.com/questions/6657005/matlab-running-an-m-file-from-command-line
-    f=open(DEFINES.PATH_FILES + fileName + ".m", 'w')
+    f=open(DEFINES.FILES_PATH + fileName + ".m", 'w')
     f.write("Z=[")
     for list in listList:
         f.write(str(list))
