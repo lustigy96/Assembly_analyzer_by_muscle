@@ -65,7 +65,6 @@ if DEFINES.FLIP_MOD:
     # vec_string_constlen = [[30]]
     # vec_flips_prob = [0.1]
     # parts_step = 50
-
     i=0
     for i_str_len in range(len(vec_strings_len)):
         for constlen in vec_string_constlen[i_str_len]:
@@ -95,41 +94,42 @@ if DEFINES.FLIP_MOD:
     print flips_res["Z"]
     plt.show()
 
-# sourceString="10001001100110001101011011010110100100010010001001010101110000001111000001010001011000100000000100100001000001101011010000110010101110001011110100011001010100111100010101110011101110100001111111011010"
-# f_strings = open(DEFINES.FILES_PATH + "strings.txt", "w")
-# prob2del=0.05
-# constlen=50
-# substrings0=ArraysBuilder.randomSample_constLen(sourceString,parts=50,constlen=constlen)
-# f_strings.write("\nlevel-0:\n")
-# dim2_arr2file(substrings0,f_strings)
-#
-# substrings0=ArraysBuilder.delOnArr(substrings0, probToDel=prob2del)
-# f_strings.write("\nlevel-0-dels:\n")
-# dim2_arr2file(substrings0,f_strings)
-#
-#
-# #iteraions
-# dim2_arr2file(substrings0, f_strings)
-#
-# unit_by_mus = True
-# itr = 0
-# while (unit_by_mus):
-#     itr += 1
-#     f_strings.write("\nlevel-" + str(itr) + ":\n")
-#     substrings1, unit_by_mus = MERGER.uniteStrings(substrings0, constlen, len(sourceString), f_strings,
-#                                                    DEFINES.OVERLAP_TRESHOLD_0,
-#                                                    prob2del);
-#     print len(substrings1)
-#     f_strings.write("\nsource:\n" + sourceString)
-#     f_strings.write("\nlevel-" + str(itr) + "-orgenized(len:" + str(len(substrings1)) + "):\n")
-#     dim2_arr2file(substrings1, f_strings)
-#     if len(substrings1) > len(substrings0):
-#         # f_strings.close()
-#         x = 1
-#     substrings0 = substrings1
-#
-# f_strings.write("\nsource:\n" + sourceString)
-# res = MERGER.my_merger(substrings0, minOverlap_bits=17, prob2flip=prob2del, sourceLen=len(sourceString),
-#                        constlen=constlen)  # 25 for 0.3 in 200
-# f_strings.write("\nmy merge:\n")
-# for r in res: f_strings.write(r + "\n")
+if DEFINES.DEL_MOD:
+    sourceString="0001000001101011010000110010101110001011110100011001010100111100010101110011101110100001111111011010"
+    f_strings = open(DEFINES.FILES_PATH + "strings.txt", "w")
+    prob2del=0.01
+    constlen=50
+    substrings0=ArraysBuilder.randomSample_constLen(sourceString,parts=50,constlen=constlen)
+    f_strings.write("\nlevel-0:\n")
+    dim2_arr2file(substrings0,f_strings)
+
+    substrings0=ArraysBuilder.delOnArr(substrings0, probToDel=prob2del)
+    f_strings.write("\nlevel-0-dels:\n")
+    dim2_arr2file(substrings0,f_strings)
+
+
+    #iteraions
+    dim2_arr2file(substrings0, f_strings)
+
+    unit_by_mus = True
+    itr = 0
+    while (unit_by_mus):
+        itr += 1
+        f_strings.write("\nlevel-" + str(itr) + ":\n")
+        substrings1, unit_by_mus = MERGER.uniteStrings(substrings0, constlen, len(sourceString), f_strings,
+                                                       DEFINES.OVERLAP_TRESHOLD_0,
+                                                       prob2del);
+        print len(substrings1)
+        f_strings.write("\nsource:\n" + sourceString)
+        f_strings.write("\nlevel-" + str(itr) + "-orgenized(len:" + str(len(substrings1)) + "):\n")
+        dim2_arr2file(substrings1, f_strings)
+        if len(substrings1) > len(substrings0):
+            # f_strings.close()
+            x = 1
+        substrings0 = substrings1
+
+    f_strings.write("\nsource:\n" + sourceString)
+    res = MERGER.my_merger(substrings0, minOverlap_bits=17, prob2flip=prob2del, sourceLen=len(sourceString),
+                           constlen=constlen)  # 25 for 0.3 in 200
+    f_strings.write("\nmy merge:\n")
+    for r in res: f_strings.write(r + "\n")

@@ -65,6 +65,17 @@ def mergeOverlapStrings_flips(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
         else:
             result = -1.0 * tot_overlap / min(letters_num1, letters_num2)
         return result  # =merged\-1 for badspace\ -2 for unmatched
+    if DEFINES.DEL_MOD:
+        if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
+        # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
+            return -1
+        if (1.0 * (flips)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
+            return -1-(1.0 * flips /tot_overlap)
+        if (1.0 * tot_overlap) / min(letters_num1, letters_num1) >= overlap_treshold:
+            result = ''.join(result)
+        else:
+            result = -1.0 * tot_overlap / min(letters_num1, letters_num2)
+        return result  # =merged\-1 for badspace\ -2 for unmatched
 
 # unite the overlapped strings BY CALLING MUSCLE and return 2-dim array with the strings
 # USES: mergeOverlapStrings_flips
