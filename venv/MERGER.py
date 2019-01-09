@@ -5,7 +5,7 @@ import math
 
 #merge the 2-strings comes out of muscle rightly,
 # return the result if the overlap is good enough, otherwise: return -1
-def mergeOverlapStrings(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
+def mergeOverlapStrings_flips(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
 
     letters_num1, letters_num2=0,0      #count the letters (not spaces) in each string
     badspace1, badspace2 = 0, 0         #count *middle* spaces
@@ -54,38 +54,47 @@ def mergeOverlapStrings(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
                 tot_overlap+=1
 
     tot_overlap-=max(tmp_space1,tmp_space2)
-    if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
-    # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
-        return -1
-    if (1.0 * (flips+badspace1+badspace2)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
-        return -1-(1.0 * flips /tot_overlap)
-    if (1.0 * tot_overlap) / min(letters_num1, letters_num1) >= overlap_treshold:
-        result = ''.join(result)
-    else:
-        result = -1.0 * tot_overlap / min(letters_num1, letters_num1)
-    return result  # =merged\-1 for badspace\ -2 for unmatched
+    if DEFINES.FLIP_MOD:
+        if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
+        # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
+            return -1
+        if (1.0 * (flips+badspace1+badspace2)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
+            return -1-(1.0 * flips /tot_overlap)
+        if (1.0 * tot_overlap) / min(letters_num1, letters_num1) >= overlap_treshold:
+            result = ''.join(result)
+        else:
+            result = -1.0 * tot_overlap / min(letters_num1, letters_num2)
+        return result  # =merged\-1 for badspace\ -2 for unmatched
+
+def mergeOverlapStrings_del(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
+
+
+
+
 
 # unite the overlapped strings BY CALLING MUSCLE and return 2-dim array with the strings
-# USES: mergeOverlapStrings
+# USES: mergeOverlapStrings_flips
 def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_to_flip):
     unite_array=[]
     is_united=False
     merged_str = [False] * len(substrings)
+    if constlen<1:
+        constlen=constlen * sourceLen
     for i in range(len(substrings) - 1):
         substr = substrings[i]
         arr2run = [substr, []]
         ind = i;
-        if (len(substr) < constlen * sourceLen / 2):
+        if (len(substr) < constlen / 2):
             merged_str[i]=True
             continue
         for s in substrings[i + 1:]:
             ind += 1
             arr2run[-1] = s
-            if (len(s) <= constlen * sourceLen / 2):
+            if (len(s) <= constlen / 2):
                 continue
             results = MuscleRunner.muscleCall(arr2run)
             if len(results) == 2:
-                r = mergeOverlapStrings(results[0], results[1],overlap_treshold,prob_to_flip,sourceLen)
+                if DEFINES.FLIP_MOD: r = mergeOverlapStrings_flips(results[0], results[1],overlap_treshold,prob_to_flip,sourceLen)
                 if r >= 0:
                     is_united=True
                     merged_str[i]=True
@@ -94,10 +103,10 @@ def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_t
                     f_strings.write(str(i) + ":\t" + ''.join(results[0]) + "\n")
                     f_strings.write(str(ind) + ":\t" + ''.join(results[1]) + "\n\n")
                     unite_array.append(r)
-                # else: #print the anacceptable
-                #     f_strings.write(str(i) + ":" + str(ind) + ":\tXXX:"+str(r)+"\n")
-                #     f_strings.write(str(i)+":\t" + ''.join(results[0]) + "\n")
-                #     f_strings.write(str(ind)+":\t" + ''.join(results[1]) + "\n\n")
+                else: #print the anacceptable
+                    f_strings.write(str(i) + ":" + str(ind) + ":\tXXX:"+str(r)+"\n")
+                    f_strings.write(str(i)+":\t" + ''.join(results[0]) + "\n")
+                    f_strings.write(str(ind)+":\t" + ''.join(results[1]) + "\n\n")
             if len(results) > 2:
                 f_strings.write("~~~~~~~~~~~~~~~~~EROR-0~~~~~~~~~~~~~~~~~~\n")
 

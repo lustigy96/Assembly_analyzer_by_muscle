@@ -9,10 +9,10 @@ def arr2FASTA(arr): #take an array and poot in fasta format
     for line in arr:
         fasta_file.write(str_form)
         fasta_file.write(str(i)+"\n")
-        for x in line:
-            if x=="0": fasta_file.write(DEFINES.ZERO+" ")
-            if x=="1": fasta_file.write(DEFINES.ONE+" ")
-        fasta_file.write("\n"); i+=1
+    	l=''.join(line)
+    	l=(l.replace('0', DEFINES.ZERO)).replace('1', DEFINES.ONE)
+        fasta_file.write(l+"\n");
+        i+=1
     fasta_file.close()
 
 def FASTA2arr(fasta_file,output_file): #take fasta file, change it to an 2dim-array and save the output on a file
@@ -50,8 +50,20 @@ def muscleCall(arr):
     fasta_file.close()
     return fasta_res
 
+#now, calc only flips
+def calc_err_bestfit(source, st):
+    min_count=len(source)
+    min_ind=-1
+    for i in range(len(source)-len(st)+1):
+        sub_source=source[i:]
+        flips = 0
 
+        for s,r in zip(sub_source,st):
+            if s!=r: flips+=1
 
+        if flips<min_count:
+            min_count, min_ind = flips,i
+    return min_count, min_ind
 
 
 
