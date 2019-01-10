@@ -36,8 +36,8 @@ def py_plotAll(data_arr,g_ind,graph_title, xlabel, ylabel, zlable,scatter,hist):
 
     dx = 0.9*np.ones(x_len * (y_len))
     dy = 0.9*np.ones(x_len * (y_len))
-    # dz = flat_arr(data_arr["Z"])
-    dz=data_arr["Z"]
+    dz = flat_arr(data_arr["Z"])
+    # dz=data_arr["Z"]
 
     print len(dx)
     print len(dy)

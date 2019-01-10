@@ -1,56 +1,54 @@
 import DEFINES
-import ValStr
+from ValStr import ValStr
 import random
 import math
+import MuscleRunner
 
 
 #valstr1,valstr2 are from ValStr class
-def mergeOverlapStrings_flips(valstr1,valstr2,overlap_treshold,prob2del,sourceLen):
+def mergeOverlapStrings_del(valstr1,valstr2,overlap_treshold,prob2del,sourceLen):
 
-    letters_num1, letters_num2=0,0      #count the letters (not spaces) in each string
-    badspace1, badspace2 = 0, 0         #count *middle* spaces
-    tmp_space1, tmp_space2=0,0          #count spaces in the strings (in order to diffrence middle spaces from end spaces)
     flips=0
-    overlap_ind_start, overlap_ind_end, ind= -1,-1,-1
-    letter_ind1,letter_ind2=-1, -1
-    s1,s2 =valstr1.str, valstr2.st
+    s1,s2 =valstr1.st, valstr2.st
 
-    for x1, x2 in zip(s1, s2):
-        # count real letters (not "-"
-        ind += 1
-        if (x1 != '-'):
-            letters_num1 += 1
-            badspace1+=tmp_space1
-            tmp_space1=0
-            if letter_ind1<0: letter_ind1=ind
-        if (x2 != '-'):
-            letters_num2 += 1
-            badspace2+=tmp_space2
-            tmp_space2=0
-            if letter_ind2<0: letter_ind2=ind
-        if (x1 !='-' and x2 != '-'):
-            if overlap_ind_start<0: overlap_ind_start=ind
-            if x1!=x2: flips+=1
+    letters_num1 = s1.count('1') + s1.count('0')
+    letters_num2 = s2.count('1') + s2.count('0')
 
-        if (x1 == '-' and overlap_ind_start >= 0): tmp_space1 +=1
-        if (x2 == '-' and overlap_ind_start >= 0): tmp_space2 +=1
+    letter_ind1_start = min(list(s1).index('0'),list(s1).index('1'))
+    letter_ind2_start = min(list(s2).index('0'),list(s2).index('1'))
+    overlap_ind_start = max(letter_ind1_start,letter_ind2_start)
 
-    overlap_ind_end = min(len(s1)-tmp_space1, len(s2)-tmp_space2)
+    reverse1=list(s1); reverse1.reverse()
+    reverse2=list(s2); reverse2.reverse()
+    letter_ind1_end = max(len(reverse1)- 1 - reverse1.index('1'),len(reverse1)- 1 - reverse1.index('0'))
+    letter_ind2_end = max(len(reverse2)- 1 - reverse2.index('1'),len(reverse2)- 1 - reverse2.index('0'))
+    overlap_ind_end = min(letter_ind1_end,letter_ind2_end)
+
     tot_overlap =overlap_ind_end-overlap_ind_start;
 
+    badspace1= s1[overlap_ind_start:overlap_ind_end+1].count('-')
+    badspace2= s2[overlap_ind_start:overlap_ind_end+1].count('-')
+
+    for x1, x2 in zip(s1, s2): # count flips
+        if x1 != x2 and x1 != '-' and x2 !='-': flips+=1
+
+
     if badspace1>math.ceil(prob2del*tot_overlap) or badspace2>math.ceil(prob2del*tot_overlap):
-        return -1
+        return [], -1
     if (1.0 * tot_overlap) / min(letters_num1, letters_num1) < overlap_treshold:
-        return -1.0 * tot_overlap / min(letters_num1, letters_num2)
+        return [], -1.0 * tot_overlap / min(letters_num1, letters_num2)
     if flips==0:
         res=merger_over_del_only(valstr1, valstr2)
-        return res
+        return res, 1
     else: #try to fix the flips
+        res,ans = fix_dels(valstr1, valstr2, prob2del)
+        if ans>=0: return res, -2
+        return [], -1-1.0*flips/tot_overlap
 
 def merger_over_del_only(valstr1, valstr2):
     res = ValStr('', 0)
     i=-1
-    for x1,x2 in zip(valstr1.str,valstr2.st):
+    for x1,x2 in zip(valstr1.st,valstr2.st):
         i+=1
         if (x1==x2): res.add(x1,[valstr1.val[i]+valstr2.val[i]])
         elif (x1=='-'): res.add(x2, [valstr2.val[i]])
@@ -63,20 +61,27 @@ def merger_over_del_only(valstr1, valstr2):
 
 def fix_dels(valstr1, valstr2, prob2del):
     del1,del2=0,0
+    prob_tresh=prob2del*1.5;
     res = ValStr('', 0)
-    s1, s2 =valstr1.st, valstr2.st
+    s1, s2 =''.join(valstr1.st), ''.join(valstr2.st)
+    errors_min=caunt_error_val(s1,s2)
+
     i,j=-1,-1
-    while i< len(s1) and j< len(s2) and del1<math.ceil(prob2del*len(s1)) and del2<math.ceil(prob2del*len(s2)):
+    while i < len(s1)-1 and j< len(s2)-1 and del1 < math.ceil(prob_tresh*len(s1)) and del2 < math.ceil(prob_tresh*len(s2)):
         j+=1; i+=1
         if s1[i]!=s2[j] and s1[i]!='-' and s2[i]!='-':
-            tmp1=s1[0:i-1]+'-'+s1[i-1:]
-            tmp2=s2[0:j-1]+'-'+s1[j-1:]
-            if caunt_error_val(tmp2,s2)<caunt_error_val(tmp1,s2):#del in 1
+            tmp1 = s1[0:i-1] + '-' + s1[i-1:]
+            tmp2 = s2[0:j-1] + '-' + s1[j-1:]
+            e1 = caunt_error_val(tmp1,s2)
+            e2 = caunt_error_val(tmp2,s2)
+            if e1 < e2 and e1< errors_min:#del in 1
                 i-=1
                 del1+=1
+                errors_min=e1
                 res.add(s2[j], [valstr2.val[j]])
-            else:
+            elif e2 < errors_min:
                 j-=1
+                errors_min=e2
                 del2+=1
                 res.add(s1[i], [valstr1.val[i]])
         else:
@@ -84,9 +89,9 @@ def fix_dels(valstr1, valstr2, prob2del):
             elif (s1[i] == '-'): res.add(s2[j], [valstr2.val[j]])
             elif (s2[j] == '-'): res.add(s1[i], [valstr1.val[i]])
 
-    if del1<math.ceil(prob2del*len(s1)) or del2<math.ceil(prob2del*len(s2)):
-        return -1
-    else: return res
+    if del1 > math.ceil(prob_tresh*len(s1)) or del2 > math.ceil(prob_tresh*len(s2)) or caunt_error_val > math.ceil(prob2del*len(s2)):
+        return [], -1
+    else: return res , 1
 
 
 #count errors between s1, s2
@@ -95,8 +100,87 @@ def caunt_error_val(s1,s2):
     for x, y in zip(s1,s2):
         if x!=y and x!='-' and y!='-': count+=1
     return count
-#
-#
+
+
+
+
+def uniteStrings(substrings_val,constlen,sourceLen,f_strings,overlap_treshold,prob_to_del):
+    unite_array=[]
+    is_united=False
+    merged_str = [False] * len(substrings_val)
+    if constlen<1:
+        constlen=constlen * sourceLen
+    for i in range(len(substrings_val) - 1):
+        substr = substrings_val[i].st
+        arr2run = [substr, []]
+        ind = i;
+        if (len(substr) < constlen / 2):
+            merged_str[i]=True
+            continue
+        for s_val in substrings_val[i + 1:]:
+            s=s_val.st
+            ind += 1
+            arr2run[-1] = s
+            if (len(s) <= constlen / 2):
+                continue
+            results = MuscleRunner.muscleCall(arr2run)
+            if len(results) == 2:
+                res1=fit_val(substrings_val[i],results[0])
+                res2=fit_val(s_val,results[1])
+
+                # if DEFINES.FLIP_MOD: r = mergeOverlapStrings_flips(results[0], results[1],overlap_treshold,prob_to_flip,sourceLen)
+                r,ans = mergeOverlapStrings_del(res1, res2,overlap_treshold,prob_to_del,sourceLen)
+                if  ans >= 0:
+                    is_united=True
+                    merged_str[i]=True
+                    merged_str[ind]=True
+                    f_strings.write(str(i) + ":" + str(ind) + ":\t" + (r.st) + "\n")
+                    f_strings.write(str(i) + ":\t" + ''.join(results[0]) + "\n")
+                    f_strings.write(str(ind) + ":\t" + ''.join(results[1]) + "\n\n")
+                    unite_array.append(r)
+                else: #print the anacceptable
+                    f_strings.write(str(i) + ":" + str(ind) + ":\tXXX:"+str(ans)+"\n")
+                    f_strings.write(str(i)+":\t" + ''.join(results[0]) + "\n")
+                    f_strings.write(str(ind)+":\t" + ''.join(results[1]) + "\n\n")
+            if len(results) > 2:
+                f_strings.write("~~~~~~~~~~~~~~~~~EROR-0~~~~~~~~~~~~~~~~~~\n")
+
+    for i in range(len(substrings_val)):
+        if not merged_str[i]:
+            unite_array.append(substrings_val[i])
+
+    # return filterSubstring(unite_array,prob_to_del), is_united
+    return unite_array, is_united
+
+def fit_val(str_val,st):
+    ind_val=0;
+    res=ValStr(st,0)
+    for i in range(len(st)):
+        if st[i]!='-':
+            res.edit_val(i, str_val.val[ind_val])
+            ind_val+=1
+    return res
+
+# def filterSubstring(arr,prob_to_del):
+#     filter_ind=[]
+#     arr.sort(lambda x,y: cmp(len(x), len(y)))
+#     for i in range(len(arr)-1):
+#         sub=arr[i]
+#         # for st in arr[i+1:]:
+#         for j in range(len(arr[i + 1:])):
+#             st=(arr[i + 1:])[j]
+#             ans, s_fix = is_substring_one2zero(sub, st, prob2flip)
+#             if(is_substring(sub,st)):
+#                 filter_ind.append(i)
+#                 break
+#             elif(ans):
+#                  filter_ind.append(i)
+#                  arr[i + 1:][j]=s_fix
+#                  break
+#     map(lambda x: arr.pop(x), sorted(filter_ind, key=lambda x: -x))
+#     return arr
+
+
 # def fit_and_val(valstr1,valstr2,prob2del):
 #     mistakes=0
 #     i, j = -1, -1;
