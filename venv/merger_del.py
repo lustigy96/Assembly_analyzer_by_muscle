@@ -33,7 +33,7 @@ def mergeOverlapStrings_del(valstr1,valstr2,overlap_treshold,prob2del,sourceLen)
         if x1 != x2 and x1 != '-' and x2 !='-': flips+=1
 
 
-    if badspace1>math.ceil(prob2del*tot_overlap) or badspace2>math.ceil(prob2del*tot_overlap):
+    if badspace1 > math.ceil(prob2del*tot_overlap) or badspace2 > math.ceil(prob2del*tot_overlap):
         return [], -1
     if (1.0 * tot_overlap) / min(letters_num1, letters_num1) < overlap_treshold:
         return [], -1.0 * tot_overlap / min(letters_num1, letters_num2)

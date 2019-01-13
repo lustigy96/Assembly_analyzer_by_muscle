@@ -65,14 +65,14 @@ if DEFINES.FLIP_MOD:
     # substrings0=ArraysBuilder.flipsOnArr_zeros(substrings0,probToFlip=prob2flip)
     # res=itterations(f_strings,substrings0,constlen, sourceString,prob2flip)
 
-    # vec_strings_len=[500,1000,2000,4000]
-    # vec_string_constlen=[[50,80,100],[50,100,200],[50,80,100,200],[50,100,400]]
-    # vec_flips_prob=[0,0.05,0.1,0.15]
-    # parts_step=50
-    vec_strings_len = [300]
-    vec_string_constlen = [[40]]
-    vec_flips_prob = [0,0.1]
-    parts_step = 100
+    vec_strings_len=[500,1000,2000,4000]
+    vec_string_constlen=[[50,80,100],[50,100,200],[50,80,100,200],[50,100,400]]
+    vec_flips_prob=[0,0.05,0.1,0.15]
+    parts_step=50
+    # vec_strings_len = [300]
+    # vec_string_constlen = [[40]]
+    # vec_flips_prob = [0,0.1]
+    # parts_step = 100
     i=0
     for i_str_len in range(len(vec_strings_len)):
         for constlen in vec_string_constlen[i_str_len]:
@@ -98,7 +98,7 @@ if DEFINES.FLIP_MOD:
                     f_strings.close()
                 fullX=True
             plot.py_plotAll(flips_res,i,"flips", "parts", "error prob", "errors",1,1)
-            MATLAB.makeMATLAB("flips_"+str(vec_strings_len[i_str_len])+"_constlen_"+str(constlen), flips_res['Z'], parts_step, parts, 0, 0.1, "parts", "error prob", "error prob", gapX=parts_step, gapY=0.1)
+            MATLAB.makeMATLAB("flips_"+str(vec_strings_len[i_str_len])+"_constlen_"+str(constlen), flips_res['Z'], parts_step, parts, 0, 0.15, "parts", "error prob", "error prob", gapX=parts_step, gapY=0.05ubu)
     print flips_res["Z"]
     plt.show()
 
