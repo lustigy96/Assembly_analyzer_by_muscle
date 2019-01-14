@@ -1,6 +1,7 @@
 import DEFINES
 import random
 import MuscleRunner
+import numpy as np
 
 #this function sample random index and put string[ind:ind+const] in arr
 def randomSample_constLen(string, parts=0, constlen=0):
@@ -15,15 +16,8 @@ def randomSample_constLen(string, parts=0, constlen=0):
     return arr
 
 def createString(length):# string creation
-    sourceString = []
-    for x in range(length):
-        r = random.random();
-        if r > 0.5:
-            sourceString.append('1')
-        else:
-            sourceString.append('0')
-    sourceString = ''.join(sourceString)
-    return sourceString
+    sourceString = np.random.uniform(0, 1,length)
+    return ''.join((sourceString > 0.5).astype(int).astype(str))
 
 #make flips on 2-dim array with probability=probToFlip
 def flipsOnArr(arr,probToFlip):

@@ -65,14 +65,14 @@ if DEFINES.FLIP_MOD:
     # substrings0=ArraysBuilder.flipsOnArr_zeros(substrings0,probToFlip=prob2flip)
     # res=itterations(f_strings,substrings0,constlen, sourceString,prob2flip)
 
-    vec_strings_len=[500,1000,2000,4000]
-    vec_string_constlen=[[50,80,100],[50,100,200],[50,80,100,200],[50,100,400]]
-    vec_flips_prob=[0,0.05,0.1,0.15]
-    parts_step=50
-    # vec_strings_len = [300]
-    # vec_string_constlen = [[40]]
-    # vec_flips_prob = [0,0.1]
-    # parts_step = 100
+    # vec_strings_len=[500,1000,2000,4000]
+    # vec_string_constlen=[[50,80,100],[50,100,200],[50,80,100,200],[50,100,400]]
+    # vec_flips_prob=[0,0.05,0.1,0.15]
+    # parts_step=50
+    vec_strings_len = [300]
+    vec_string_constlen = [[40]]
+    vec_flips_prob = [0,0.1]
+    parts_step = 100
     i=0
     for i_str_len in range(len(vec_strings_len)):
         for constlen in vec_string_constlen[i_str_len]:
@@ -98,7 +98,7 @@ if DEFINES.FLIP_MOD:
                     f_strings.close()
                 fullX=True
             plot.py_plotAll(flips_res,i,"flips", "parts", "error prob", "errors",1,1)
-            MATLAB.makeMATLAB("flips_"+str(vec_strings_len[i_str_len])+"_constlen_"+str(constlen), flips_res['Z'], parts_step, parts, 0, 0.15, "parts", "error prob", "error prob", gapX=parts_step, gapY=0.05ubu)
+            MATLAB.makeMATLAB("flips_"+str(vec_strings_len[i_str_len])+"_constlen_"+str(constlen), flips_res['Z'], parts_step, parts, 0, 0.15, "parts", "error prob", "error prob", gapX=parts_step, gapY=0.05)
     print flips_res["Z"]
     plt.show()
 
@@ -127,21 +127,21 @@ if DEFINES.DEL_MOD:
     while (unit_by_mus):
         itr += 1
         f_strings.write("\nlevel-" + str(itr) + ":\n")
-        substrings1, unit_by_mus = merger_del.uniteStrings(substrings_val0, constlen, len(sourceString), f_strings,
+        substrings_val1, unit_by_mus = merger_del.uniteStrings(substrings_val0, constlen, len(sourceString), f_strings,
                                                        DEFINES.OVERLAP_TRESHOLD_0,
                                                        prob2del);
 
-        print len(substrings1)
+        print len(substrings_val1)
         f_strings.write("\nsource:\n" + sourceString)
-        f_strings.write("\nlevel-" + str(itr) + "-orgenized(len:" + str(len(substrings1)) + "):\n")
-        dim2_stval2file(substrings1, f_strings)
-        if len(substrings1) > len(substrings0):
-            #f_strings.close()
+        f_strings.write("\nlevel-" + str(itr) + "-orgenized(len:" + str(len(substrings_val1)) + "):\n")
+        dim2_stval2file(substrings_val1, f_strings)
+        if len(substrings_val1) > len(substrings_val0):
+            f_strings.close()
             x = 1
-        substrings0 = substrings1
+        substrings_val0 = substrings_val1
 
     f_strings.write("\nsource:\n" + sourceString)
-    # res = MERGER.my_merger(substrings0, minOverlap_bits=17, prob2flip=prob2del, sourceLen=len(sourceString),
+    # res = MERGER.my_merger(substrings_val0, minOverlap_bits=17, prob2flip=prob2del, sourceLen=len(sourceString),
     #                        constlen=constlen)  # 25 for 0.3 in 200
     # f_strings.write("\nmy merge:\n")
     # for r in res: f_strings.write(r + "\n")

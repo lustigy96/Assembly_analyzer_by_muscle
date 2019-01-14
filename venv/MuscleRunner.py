@@ -52,18 +52,25 @@ def muscleCall(arr):
 
 #now, calc only flips
 def calc_err_bestfit(source, st):
-    min_count=len(source)
-    min_ind=-1
-    for i in range(len(source)-len(st)+1):
-        sub_source=source[i:]
-        flips = 0
+    min_ind = -1
+    if len(st)>len(source):
+        min_count = len(st)
+        longer=-1
+        source_fun=st
+        st_fun= source
+    else:
+        min_count=len(source)
+        longer = 1
+        source_fun=source
+        st_fun=st
 
-        for s,r in zip(sub_source,st):
-            if s!=r: flips+=1
+    for i in range(len(source_fun)-len(st_fun)+1):
+        sub_source=source_fun[i:]
+        flips = sum(1 for a, b in zip(sub_source, st) if (a != b and b!='-' and a!='-'))
 
         if flips<min_count:
             min_count, min_ind = flips,i
-    return min_count, min_ind
+    return longer*min_count, min_ind
 
 
 

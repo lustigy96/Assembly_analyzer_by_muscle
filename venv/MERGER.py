@@ -145,45 +145,27 @@ def filterSubstring(arr,prob2flip):
 
 # return true only if sub is a substing og st EXACTLY
 def is_substring(sub, st):
-    ans=False
     if len(sub)>len(st):
         return False
     for i in range(len(st) - len(sub)+1):
-        booli=True
-        for s, r in zip(st[i:], sub):
-            if s != r:
-                booli=False
-                break
-        if booli:
-            ans=True
-    return ans
+        count_err = sum(1 for s, r in zip(st[i:], sub) if s != r)
+        if count_err==0:
+            return True
+    return False
 
 #return true and the fixed string: if sub is a substring of st WITH SOME FLIPS
 def is_substring_one2zero(sub, st,prob2flip):
-    ans=False
-    count_err=0
     if len(sub)>len(st): return False, -1
     for i in range(len(st) - len(sub)+1):
-        booli=True
-        for s, r in zip(st[i:], sub):
-            if s != r:
-                if count_err>math.ceil(2*prob2flip*len(sub)):
-                    booli=False
-                    count_err=0
-                    break
-                count_err+=1
-
-        if booli:
-            s= catStrings_one2zero(st[i:], sub, 0)
-            return True,s
+        count_err = sum(1 for s, r in zip(st[i:], sub) if s != r)
+        if count_err <= 2*prob2flip*len(sub):
+            s = catStrings_one2zero(st[i:], sub, 0)
+            return True, s
     return False,-1
 
 #count errors between s1, s2
 def caunt_error_val(s1,s2):
-    count =0;
-    for x, y in zip(s1,s2):
-        if x!=y: count+=1
-    return count
+    return sum(1 for s, r in zip(s1,s2) if s != r)
 
 #cat 2 strings -> min error and max overlap (priority to min errors)
 def my_cat_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
@@ -195,8 +177,8 @@ def my_cat_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
         if tmp<math.ceil(1.5*prob2flip*min(len(first)-i,len(second)))and tmp<min_count_err:
             min_err_ind, min_count_err=i, tmp
     if min_err_ind==-1:
-        return min_err_ind, max(first,second)
-    return min_err_ind,tmp
+        return min_err_ind, max(len(first),len(second))
+    return min_err_ind,min_count_err
 
 #try to merge all the strings in substrings, and return the all final fregments results
 # USES: my_cat_2string
