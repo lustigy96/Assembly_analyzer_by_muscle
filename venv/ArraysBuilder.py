@@ -6,8 +6,7 @@ import numpy as np
 #this function sample random index and put string[ind:ind+const] in arr
 def randomSample_constLen(string, parts=0, constlen=0):
     arr=[]; strlen=len(string);
-    if constlen<1:
-        constlen=int(constlen*strlen);
+    if constlen<1: constlen=int(constlen*strlen);
     constlen=constlen/2
     for x in range(parts):
         ind=random.randint(0,strlen-1)
@@ -21,6 +20,7 @@ def createString(length):# string creation
 
 #make flips on 2-dim array with probability=probToFlip
 def flipsOnArr(arr,probToFlip):
+
     arr=list(arr)
     for x in range(len(arr)):
         for i in range(len(arr[x])):

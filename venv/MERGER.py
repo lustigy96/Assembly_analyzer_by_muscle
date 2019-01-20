@@ -2,80 +2,48 @@ import DEFINES
 import random
 import MuscleRunner
 import math
+import numpy as np
 
 #merge the 2-strings comes out of muscle rightly,
 # return the result if the overlap is good enough, otherwise: return -1
 def mergeOverlapStrings_flips(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
 
-    letters_num1, letters_num2=0,0      #count the letters (not spaces) in each string
-    badspace1, badspace2 = 0, 0         #count *middle* spaces
-    tmp_space1, tmp_space2=0,0          #count spaces in the strings (in order to diffrence middle spaces from end spaces)
-    tot_overlap, correct= 0,0           #count the correct overlap and the total overlap
-    flips=0
+    letters_num1 = len(s1) - s1.count('-')  # count real letters (not "-")
+    letters_num2 = len(s2) - s2.count('-')   # count real letters (not "-")
+
+    letter_ind1_start = min(list(s1).index('0'),list(s1).index('1'))
+    letter_ind2_start = min(list(s2).index('0'),list(s2).index('1'))
+    overlap_ind_start = max(letter_ind1_start,letter_ind2_start)
+
+    reverse1=list(s1); reverse1.reverse()
+    reverse2=list(s2); reverse2.reverse()
+    letter_ind1_end = max(len(reverse1)- 1 - reverse1.index('1'),len(reverse1)- 1 - reverse1.index('0'))
+    letter_ind2_end = max(len(reverse2)- 1 - reverse2.index('1'),len(reverse2)- 1 - reverse2.index('0'))
+    overlap_ind_end = min(letter_ind1_end,letter_ind2_end)
+
+    tot_overlap =overlap_ind_end-overlap_ind_start;
+    badspace1= s1[overlap_ind_start:overlap_ind_end+1].count('-')
+    badspace2= s2[overlap_ind_start:overlap_ind_end+1].count('-')
+    flips = max(0, np.sum(s1 != s2) - np.sum(s1 == '-') - np.sum(s2 == '-'))
 
     result = [];
-    for x1, x2 in zip(s1, s2):
-        # count real letters (not "-"
-        if (x1 != '-'): letters_num1 += 1
-        if (x2 != '-'): letters_num2 += 1
-        if tot_overlap > 0: tot_overlap += 1
+    for x1, x2 in zip(s1, s2): #construct the right string
+        if x1 == x2: result.append(x1)
+        elif x1 == '-' and x2 != '-': result.append(x2)
+        elif x2 == '-' and x1 != '-': result.append(x1)
+        else:result.append('0')  # there was a flip and decision should be made
 
-        # count overlap and spaces
-        if x1 == x2:
-            result.append(x1)
-            if x1 != '-':
-                correct += 1
-                badspace1 += tmp_space1
-                badspace2 += tmp_space2
-                tmp_space1, tmp_space2 = 0, 0
-                if tot_overlap==0: tot_overlap+=1
-            elif tot_overlap > 0:
-                tmp_space1 += 1; tmp_space2 += 1;
+    # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
+    if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
+        return -1
+    if (1.0 * (flips+badspace1+badspace2)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
+        return -1-(1.0 * flips /tot_overlap)
+    if (1.0 * tot_overlap) / min(letters_num1, letters_num1) >= overlap_treshold:
+        result = ''.join(result)
+    else:
+        result = -1.0 * tot_overlap / min(letters_num1, letters_num2)
+    return result  # =merged\-1 for badspace\ -2 for unmatched
 
-        elif x1 == '-' and x2 != '-':
-            result.append(x2)
-            badspace2 += tmp_space2
-            tmp_space2 = 0
-            if tot_overlap > 0: tmp_space1 += 1
-
-        elif x2 == '-' and x1 != '-':
-            result.append(x1)
-            badspace1 += tmp_space1
-            tmp_space1 = 0
-            if tot_overlap > 0: tmp_space2 += 1
-
-        else:  # there was a flip and decision should be made
-            result.append('0')
-            flips += 1
-            badspace1 += tmp_space1
-            badspace2 += tmp_space2
-            tmp_space1, tmp_space2=0,0
-            if tot_overlap==0:
-                tot_overlap+=1
-
-    tot_overlap-=max(tmp_space1,tmp_space2)
-    if DEFINES.FLIP_MOD:
-        if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
-        # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
-            return -1
-        if (1.0 * (flips+badspace1+badspace2)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
-            return -1-(1.0 * flips /tot_overlap)
-        if (1.0 * tot_overlap) / min(letters_num1, letters_num1) >= overlap_treshold:
-            result = ''.join(result)
-        else:
-            result = -1.0 * tot_overlap / min(letters_num1, letters_num2)
-        return result  # =merged\-1 for badspace\ -2 for unmatched
-    if DEFINES.DEL_MOD:
-        if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
-        # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
-            return -1
-        if (1.0 * (flips)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
-            return -1-(1.0 * flips /tot_overlap)
-        if (1.0 * tot_overlap) / min(letters_num1, letters_num1) >= overlap_treshold:
-            result = ''.join(result)
-        else:
-            result = -1.0 * tot_overlap / min(letters_num1, letters_num2)
-        return result  # =merged\-1 for badspace\ -2 for unmatched
 
 # unite the overlapped strings BY CALLING MUSCLE and return 2-dim array with the strings
 # USES: mergeOverlapStrings_flips
@@ -116,10 +84,8 @@ def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_t
             if len(results) > 2:
                 f_strings.write("~~~~~~~~~~~~~~~~~EROR-0~~~~~~~~~~~~~~~~~~\n")
 
-    for i in range(len(substrings)):
-        if not merged_str[i]:
-            unite_array.append(substrings[i])
-
+    sval_np=np.array(substrings)
+    unite_array.extend(sval_np[ np.logical_not(merged_str)].tolist())
     return filterSubstring(unite_array,prob_to_flip), is_united
 
 # filter the substrings in arr
@@ -145,13 +111,9 @@ def filterSubstring(arr,prob2flip):
 
 # return true only if sub is a substing og st EXACTLY
 def is_substring(sub, st):
-    if len(sub)>len(st):
-        return False
-    for i in range(len(st) - len(sub)+1):
-        count_err = sum(1 for s, r in zip(st[i:], sub) if s != r)
-        if count_err==0:
-            return True
-    return False
+    ind= st.find(sub)
+    return (ind>=0)
+
 
 #return true and the fixed string: if sub is a substring of st WITH SOME FLIPS
 def is_substring_one2zero(sub, st,prob2flip):
@@ -203,16 +165,8 @@ def my_merger(substrings,minOverlap_bits,prob2flip,sourceLen,constlen):
             ind1, error1 = my_cat_2string(res, other[i], minOverlap_bits,prob2flip,sourceLen)
             ind2, error2 = my_cat_2string(other[i], res, minOverlap_bits,prob2flip,sourceLen)
             if ind1 > 0 or ind2 > 0:
-                if error1 < error2:
-                    print ind1
-                    print res
-                    print other[i]
-                    res = catStrings_one2zero(res,other[i],ind1)#res[0:ind1] + other[i]  # fix flips
-                else:
-                    print ind2
-                    print other[i]
-                    print res
-                    res = catStrings_one2zero(other[i],res,ind2)# other[i][0:ind2] + res  # fix flips
+                if error1 < error2: res = catStrings_one2zero(res,other[i],ind1)
+                else: res = catStrings_one2zero(other[i],res,ind2)
                 if len(other) == 1: other = []
                 else: other=other[0:i]+other[i+1:]
                 booli=True

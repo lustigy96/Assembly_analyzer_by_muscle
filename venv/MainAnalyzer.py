@@ -72,7 +72,7 @@ if DEFINES.FLIP_MOD:
     vec_strings_len = [300]
     vec_string_constlen = [[40]]
     vec_flips_prob = [0,0.1]
-    parts_step = 100
+    parts_step = 30
     i=0
     for i_str_len in range(len(vec_strings_len)):
         for constlen in vec_string_constlen[i_str_len]:
@@ -84,7 +84,7 @@ if DEFINES.FLIP_MOD:
                 parts=0
                 flips_res["Y"].append(prob2flip)
                 flips_res["Z"].append([])
-                while parts<0.5*vec_strings_len[i_str_len]:
+                while parts<40:#0.5*vec_strings_len[i_str_len]:
                     parts+=parts_step
                     if not fullX: flips_res["X"].append(parts)
                     f_strings = open(DEFINES.FILES_PATH + "strings.txt", "w")
@@ -117,7 +117,7 @@ if DEFINES.DEL_MOD:
 
     substrings_val0=[]
     for s in substrings0:
-        tmp=ValStr(s,0)
+        tmp=ValStr(s,[0])
         substrings_val0.append(tmp)
 
     #iteraions
