@@ -24,16 +24,16 @@ def mergeOverlapStrings_flips(s1,s2,overlap_treshold,prob_to_flip,sourceLen):
     tot_overlap =overlap_ind_end-overlap_ind_start;
     badspace1= s1[overlap_ind_start:overlap_ind_end+1].count('-')
     badspace2= s2[overlap_ind_start:overlap_ind_end+1].count('-')
-    flips = max(0, np.sum(s1 != s2) - np.sum(s1 == '-') - np.sum(s2 == '-'))
+    flips = max(0, np.sum(np.array(list(s1)) != np.array(list(s2))) - s1.count('-') - s2.count('-'))
 
-    result = [];
-    for x1, x2 in zip(s1, s2): #construct the right string
-        if x1 == x2: result.append(x1)
-        elif x1 == '-' and x2 != '-': result.append(x2)
-        elif x2 == '-' and x1 != '-': result.append(x1)
-        else:result.append('0')  # there was a flip and decision should be made
+    # construct the right string
+    result = np.array(['0'] * len(zip(s1, s2)))
+    arr1 = np.array(list(s1))
+    arr2 = np.array(list(s2))
+    result[(arr1 == arr2)] = arr1[(arr1 == arr2)]
+    result[(arr1 == '-')] = arr2[(arr1 == '-')]
+    result[(arr2 == '-')] = arr1[(arr2 == '-')]
 
-    # if (1.0 * max(badspace1,badspace2)/sourceLen) > prob_to_flip:#DEFINES.BAD_SPACE_TRESH:
     if(badspace1)>math.floor(prob_to_flip*tot_overlap) or (badspace2)>math.floor(prob_to_flip*tot_overlap):
         return -1
     if (1.0 * (flips+badspace1+badspace2)/tot_overlap) > 1.5*prob_to_flip: #(1.0 * flips /tot_overlap) > 2*prob_to_flip:
@@ -78,14 +78,16 @@ def uniteStrings(substrings,constlen,sourceLen,f_strings,overlap_treshold,prob_t
                     f_strings.write(str(ind) + ":\t" + ''.join(results[1]) + "\n\n")
                     unite_array.append(r)
                 else: #print the anacceptable
-                    f_strings.write(str(i) + ":" + str(ind) + ":\tXXX:"+str(r)+"\n")
-                    f_strings.write(str(i)+":\t" + ''.join(results[0]) + "\n")
-                    f_strings.write(str(ind)+":\t" + ''.join(results[1]) + "\n\n")
+                    if r!=-1:
+                        f_strings.write(str(i) + ":" + str(ind) + ":\tXXX:"+str(r)+"\n")
+                        f_strings.write(str(i)+":\t" + ''.join(results[0]) + "\n")
+                        f_strings.write(str(ind)+":\t" + ''.join(results[1]) + "\n\n")
             if len(results) > 2:
                 f_strings.write("~~~~~~~~~~~~~~~~~EROR-0~~~~~~~~~~~~~~~~~~\n")
 
     sval_np=np.array(substrings)
     unite_array.extend(sval_np[ np.logical_not(merged_str)].tolist())
+
     return filterSubstring(unite_array,prob_to_flip), is_united
 
 # filter the substrings in arr
@@ -95,7 +97,6 @@ def filterSubstring(arr,prob2flip):
     arr.sort(lambda x,y: cmp(len(x), len(y)))
     for i in range(len(arr)-1):
         sub=arr[i]
-        # for st in arr[i+1:]:
         for j in range(len(arr[i + 1:])):
             st=(arr[i + 1:])[j]
             ans, s_fix = is_substring_one2zero(sub, st, prob2flip)
@@ -119,7 +120,7 @@ def is_substring(sub, st):
 def is_substring_one2zero(sub, st,prob2flip):
     if len(sub)>len(st): return False, -1
     for i in range(len(st) - len(sub)+1):
-        count_err = sum(1 for s, r in zip(st[i:], sub) if s != r)
+        count_err = caunt_error_val(st[i:],sub) #sum(1 for s, r in zip(st[i:], sub) if s != r)
         if count_err <= 2*prob2flip*len(sub):
             s = catStrings_one2zero(st[i:], sub, 0)
             return True, s
@@ -127,7 +128,9 @@ def is_substring_one2zero(sub, st,prob2flip):
 
 #count errors between s1, s2
 def caunt_error_val(s1,s2):
-    return sum(1 for s, r in zip(s1,s2) if s != r)
+    #return sum(1 for s, r in zip(s1,s2) if s != r)
+    a, b=np.array(list(s1[:min(len(s1),len(s2))])), np.array(list(s2[:min(len(s1),len(s2))]))
+    return np.sum(a!=b)
 
 #cat 2 strings -> min error and max overlap (priority to min errors)
 def my_cat_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
@@ -147,7 +150,7 @@ def my_cat_2string(first,second,minOverlap_bits,prob2flip,sourceLen):
 def my_merger(substrings,minOverlap_bits,prob2flip,sourceLen,constlen):
     # # filter the strings with constLen - MAYBE FROM SOME SPESIFIC LEN AND UNDER IT
     # substrings = [k for k in substrings if len(k)>constlen*sourceLen]
-
+    if len(substrings)==0: return []
     res=substrings[0];
     other=substrings[1:]
     booli=True
@@ -206,13 +209,17 @@ def merge_mus_all_output(arr):#calc the final string out of samples in arr, fix:
 
 #concat the string from indx to the end, but fix 1 to 0 if flipped
 def catStrings_one2zero(s1,s2,indx):
-    res=s1[0:indx]
-    for c1,c2 in zip(s1[indx:],s2):
-        if c1==c2: res+=c1
-        else: res+='0'
-    if len(s2)>len(s1[indx:]):
-        res+=s2[len(s1[indx:]):]
-    elif len(s1[indx:])>len(s2):
-        res += s1[len( s1[indx+len(s2):] ):]
-    return res
+    res = s1[0:indx]
+    arr1 = np.array(list(s1[indx:][: len(zip(s1[indx:], s2))]))
+    arr2 = np.array(list(s2[: len(zip(s1[indx:], s2))]))
 
+    temp = np.array(['0'] * len(zip(s1[indx:], s2)))
+    temp[(arr1 == arr2)] = arr1[(arr1 == arr2)]
+    temp = ''.join(temp)
+
+    res += temp
+    if len(s2) > len(s1[indx:]):
+        res += s2[len(s1[indx:]):]
+    elif len(s1[indx:]) > len(s2):
+        res += s1[indx + len(s2):]
+    return res

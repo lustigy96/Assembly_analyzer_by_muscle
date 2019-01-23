@@ -26,7 +26,7 @@ def mergeOverlapStrings_del(valstr1,valstr2,overlap_treshold,prob2del,sourceLen)
 
     badspace1= s1[overlap_ind_start:overlap_ind_end+1].count('-')
     badspace2= s2[overlap_ind_start:overlap_ind_end+1].count('-')
-    flips = max(0, np.sum(s1 != s2) - np.sum(s1 == '-') - np.sum(s2 == '-'))
+    flips = max(0, np.sum(np.array(list(s1)) != np.array(list(s2))) - s1.count('-') - s2.count('-'))
 
     if badspace1 > math.ceil(prob2del*tot_overlap) or badspace2 > math.ceil(prob2del*tot_overlap):
         return [], -1
@@ -40,16 +40,41 @@ def mergeOverlapStrings_del(valstr1,valstr2,overlap_treshold,prob2del,sourceLen)
         return [], -1-1.0*flips/tot_overlap
 
 def merger_over_del_only(valstr1, valstr2):
-    res = ValStr('', [0])
-    i=-1
-    for x1,x2 in zip(valstr1.st,valstr2.st):
-        i+=1
-        if (x1==x2): res.cat(x1,[valstr1.val[i]+valstr2.val[i]])
-        elif (x1=='-'): res.cat(x2, [valstr2.val[i]])
-        elif (x2=='-'): res.cat(x1, [valstr1.val[i]])
-        elif (valstr1.val[i] > valstr2.val[i]): res.cat(x1, [valstr1.val[i]])
-        elif (valstr1.val[i] < valstr2.val[i]): res.cat(x2, [valstr2.val[i]])
-        else: res.cat('0', [valstr2.val[i]])
+
+    length= min( len(valstr1.st), len(valstr2.st) )
+    st=np.array(['F'] * len(zip(valstr1.st, valstr2.st)))
+    val=np.array([0]*len(zip(valstr1.st, valstr2.st)))
+
+    arr1 = np.array(list(valstr1.st[:length]))
+    arr2 = np.array(list(valstr2.st[:length]))
+
+    st[(arr1 == arr2)] = arr1[(arr1 == arr2)]
+    val[(arr1 == arr2)] = valstr1.val[:length][(arr1 == arr2)]  + valstr2.val[:length][(arr1 == arr2)]
+
+    st[(arr1 == '-')] = arr2[(arr1 == '-')]
+    val[(arr1 == '-')] = valstr2.val[:length][(arr1 == '-')]
+
+    st[(arr2 == '-')] = arr1[(arr2 == '-')]
+    val[(arr2 == '-')] = valstr1.val[:length][(arr2 == '-')]
+
+    st[np.logical_and(st=='F', valstr1.val[:length] > valstr2.val[:length]) ] = arr1[ np.logical_and(st=='F' , valstr1.val[:length] > valstr2.val[:length] ) ]
+    val[np.logical_and(st=='F', valstr1.val[:length] > valstr2.val[:length])] = valstr1.val[:length][np.logical_and(st=='F' , valstr1.val[:length] > valstr2.val[:length])]
+
+    st[np.logical_and(st=='F' , valstr1.val[:length] < valstr2.val[:length] )] = arr2[ np.logical_and(st=='F' , valstr1.val[:length] < valstr2.val[:length]) ]
+    val[np.logical_and(st=='F' , valstr1.val[:length] < valstr2.val[:length])] = valstr2.val[:length][np.logical_and(st=='F' , valstr1.val[:length] < valstr2.val[:length])]
+
+    st[(st=='F')] = ['0']* len(st[(st=='F')])
+    val[(st=='F')] = valstr2.val[:length][(st=='F')]
+
+    # for x1,x2 in zip(valstr1.st,valstr2.st):
+    #     i+=1
+    #     if (x1==x2): res.cat(x1,[valstr1.val[i]+valstr2.val[i]])
+    #     elif (x1=='-'): res.cat(x2, [valstr2.val[i]])
+    #     elif (x2=='-'): res.cat(x1, [valstr1.val[i]])
+    #     elif (valstr1.val[i] > valstr2.val[i]): res.cat(x1, [valstr1.val[i]])
+    #     elif (valstr1.val[i] < valstr2.val[i]): res.cat(x2, [valstr2.val[i]])
+    #     else: res.cat('0', [valstr2.val[i]])
+    res=ValStr(''.join(st),val)
     return res
 
 
@@ -114,7 +139,8 @@ def filterSubstring(arr,prob2del):
         for j in range(len(arr[i + 1:])):
             st=(arr[i + 1:])[j].st
             ans_p,ind = is_substring(sub,st)
-            res, ans_np = fix_dels(arr[i], arr[i + 1:][j], prob2del)
+            res, ans_np = is_substring_over_del(arr[i], arr[i + 1:][j], prob2del)
+            # res, ans_np = fix_dels(arr[i], arr[i + 1:][j], prob2del)
             if ans_p:
                 vec_val= np.concatenate( (np.array([0]* ind), arr[i].val, np.array([0]*(len(st)-len(sub)-ind))), axis=None)
                 arr[i+1:][j].add2val(vec_val)
@@ -178,6 +204,15 @@ def fix_dels(val_s1, val_s2, prob2del):
         strv2_new=ValStr(s2,val2_new)
         res=merger_over_del_only(strv1_new, strv2_new)
         return res, 1
+
+#check if s_val1 is  in s_val2
+def is_substring_over_del(val_s1,val_s2,prob2del):
+    for i in range(len(val_s2.st)-len(val_s1.st)+1):
+        tmp=ValStr(val_s2.st[i:], val_s2.val[i:])
+        res, ans_np = fix_dels(val_s1, tmp, prob2del)
+        if ans_np==1:
+            return res, ans_np
+    return [],-1
 
 # return true only if sub is a substing og st EXACTLY
 def is_substring(sub, st):

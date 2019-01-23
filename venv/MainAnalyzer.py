@@ -47,7 +47,7 @@ def itterations(f_strings,substrings0,constlen, sourceString,prob2flip):
 
     f_strings.write("\nsource:\n" + sourceString)
     res = MERGER.my_merger(substrings0, minOverlap_bits=17, prob2flip=prob2flip, sourceLen=len(sourceString),
-                           constlen=constlen)  # 25 for 0.3 in 200
+                       constlen=constlen)  # 25 for 0.3 in 200
     f_strings.write("\nmy merge:\n")
     for r in res: f_strings.write(r + "\n")
 
@@ -66,13 +66,15 @@ if DEFINES.FLIP_MOD:
     # res=itterations(f_strings,substrings0,constlen, sourceString,prob2flip)
 
     # vec_strings_len=[500,1000,2000,4000]
-    # vec_string_constlen=[[50,80,100],[50,100,200],[50,80,100,200],[50,100,400]]
-    # vec_flips_prob=[0,0.05,0.1,0.15]
-    # parts_step=50
-    vec_strings_len = [300]
-    vec_string_constlen = [[40]]
-    vec_flips_prob = [0,0.1]
-    parts_step = 30
+    # vec_string_constlen=[[50,80,100],[50,100, 200],[50,100,200],[50,100,400]]
+    vec_strings_len=[1000,2000,4000]
+    vec_string_constlen=[[50,100, 200],[50,100,200],[50,100,400]]
+    vec_flips_prob=[0.05,0.1,0.15]
+    parts_step=50
+    # vec_strings_len = [300]
+    # vec_string_constlen = [[40]]
+    # vec_flips_prob = [0.05]
+    # parts_step = 40
     i=0
     for i_str_len in range(len(vec_strings_len)):
         for constlen in vec_string_constlen[i_str_len]:
@@ -84,7 +86,7 @@ if DEFINES.FLIP_MOD:
                 parts=0
                 flips_res["Y"].append(prob2flip)
                 flips_res["Z"].append([])
-                while parts<40:#0.5*vec_strings_len[i_str_len]:
+                while parts< 200:
                     parts+=parts_step
                     if not fullX: flips_res["X"].append(parts)
                     f_strings = open(DEFINES.FILES_PATH + "strings.txt", "w")
