@@ -48,6 +48,7 @@ def itterations(f_strings,substrings0,constlen, sourceString,prob2flip):
     f_strings.write("\nsource:\n" + sourceString)
     res = MERGER.my_merger(substrings0, minOverlap_bits=17, prob2flip=prob2flip, sourceLen=len(sourceString),
                        constlen=constlen)  # 25 for 0.3 in 200
+
     f_strings.write("\nmy merge:\n")
     for r in res: f_strings.write(r + "\n")
 
@@ -105,11 +106,11 @@ if DEFINES.FLIP_MOD:
     plt.show()
 
 if DEFINES.DEL_MOD:
-    sourceString="0001000001101011010000110010101110001011110100011001010100111100010101110011101110100001111111011010"
+    sourceString="10001001100110001101011011010110100100010010001001010101110000001111000001010001011000100000000100100001000001101011010000110010101110001011110100011001010100111100010101110011101110100001111111011010"
     f_strings = open(DEFINES.FILES_PATH + "strings.txt", "w")
     prob2del=0.05
     constlen=50
-    substrings0=ArraysBuilder.randomSample_constLen(sourceString,parts=30,constlen=constlen)
+    substrings0=ArraysBuilder.randomSample_constLen(sourceString,parts=60,constlen=constlen)
     f_strings.write("\nlevel-0:\n")
     dim2_arr2file(substrings0,f_strings)
 
@@ -141,9 +142,10 @@ if DEFINES.DEL_MOD:
             f_strings.close()
             x = 1
         substrings_val0 = substrings_val1
-
     f_strings.write("\nsource:\n" + sourceString)
-    # res = MERGER.my_merger(substrings_val0, minOverlap_bits=17, prob2flip=prob2del, sourceLen=len(sourceString),
-    #                        constlen=constlen)  # 25 for 0.3 in 200
-    # f_strings.write("\nmy merge:\n")
-    # for r in res: f_strings.write(r + "\n")
+
+    res = merger_del.my_merge(substrings_val0, prob2del=prob2del)  # 25 for 0.3 in 200
+    res = merger_del.filterSubstring(res, prob2del=prob2del)  # 25 for 0.3 in 200
+
+    f_strings.write("\nmy merge:\n")
+    for r in res: f_strings.write(r.st + "\n")

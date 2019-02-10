@@ -39,6 +39,7 @@ def mergeOverlapStrings_del(valstr1,valstr2,overlap_treshold,prob2del,sourceLen)
         if ans>=0: return res, 0
         return [], -1-1.0*flips/tot_overlap
 
+#merge only the overlapped, from the begining
 def merger_over_del_only(valstr1, valstr2):
 
     length= min( len(valstr1.st), len(valstr2.st) )
@@ -154,6 +155,7 @@ def filterSubstring(arr,prob2del):
     return arr
 
 
+#fix the deletions if it is under the error probability
 def fix_dels(val_s1, val_s2, prob2del):
     prob_tresh=prob2del*1.5;
     i,j=-1,-1
@@ -197,21 +199,22 @@ def fix_dels(val_s1, val_s2, prob2del):
                 val2_new=np.insert(val2_new, j, 0)
     errors_min = caunt_error_val(s1, s2)
 
-    if del1 > math.ceil(prob_tresh*len(s1)) or del2 > math.ceil(prob_tresh*len(s2)) or errors_min > 2:#math.ceil(prob2del*len(s2)):
+    # if del1 > math.ceil(prob_tresh*len(s1)) or del2 > math.ceil(prob_tresh*len(s2)) or errors_min > 2:#math.ceil(prob2del*len(s2)):
+    if del1 > math.ceil(len(s1)) or del2 > math.ceil(len(s2)) or errors_min > 2*prob2del:#math.ceil(prob2del*len(s2)):
         return [], -1
     else:
         strv1_new=ValStr(s1,val1_new)
         strv2_new=ValStr(s2,val2_new)
         res=merger_over_del_only(strv1_new, strv2_new)
-        return res, 1
+        return res, errors_min + del1+del2
 
 #check if s_val1 is  in s_val2
 def is_substring_over_del(val_s1,val_s2,prob2del):
     for i in range(len(val_s2.st)-len(val_s1.st)+1):
         tmp=ValStr(val_s2.st[i:], val_s2.val[i:])
         res, ans_np = fix_dels(val_s1, tmp, prob2del)
-        if ans_np==1:
-            return res, ans_np
+        if ans_np!=-1:
+            return res, 1
     return [],-1
 
 # return true only if sub is a substing og st EXACTLY
@@ -223,4 +226,60 @@ def is_substring(sub, st):
 def caunt_error_val(s1,s2):
     return sum(1 for s, r in zip(s1,s2) if (s != r and s!='-' and r!='-'))
 
+
+def my_cat_2string(first_vs,second_vs,prob2del):
+    min_err_ind=-1
+    len1, len2=len(first_vs.st), len(second_vs.st)
+    minOverlap_bits = int(math.floor(0.25*min(len1,len2)))
+    min_count_err = max(len1,len2)
+
+    for i in range(len1-minOverlap_bits):
+        res_t, tmp=(fix_dels(first_vs.cut_from(i), second_vs.cut_until(min(len1-i,len2)),prob2del))
+        if tmp<math.ceil(2*prob2del*min(len(first_vs.st)-i,len(second_vs.st)))and tmp<min_count_err and tmp!=-1:
+            min_err_ind, min_count_err=i, tmp
+            res=res_t
+
+    if min_err_ind==-1:
+        return [], -1
+    res=((first_vs.cut_until(min_err_ind)).cat(res.st, res.val))
+    print "ind "+ str(min_err_ind)
+    if len1-min_err_ind < len2:
+        p=second_vs.cut_from(len1-min_err_ind)
+        res = res.cat(p.st, p.val)
+
+    return res,min_count_err
+
+def my_merge(arr,prob2del):
+    if len(arr) == 0: return []
+    res = arr[0];
+    other = arr[1:]
+    booli = True
+    all_final = []
+    count=0
+    print "---------line " + str(count) + "----------------"
+    while len(other) > 0:
+        if not booli:  # cant append anything to res
+            all_final.append(res)
+            res = other[0]
+            if len(other) == 1: other = []
+            else: other = other[1:]
+            count += 1
+            print "---------line " + str(count) + "----------------"
+        booli = False
+
+        for i in range(len(other)):  # try to append substring to res
+            res1, error1 = my_cat_2string(res, other[i], prob2del*1.2)
+            res2, error2 = my_cat_2string(other[i], res, prob2del*1.2)
+            if error1 != -1 or error2 !=-1:
+                print "i: " +str(i)
+                if (error1 < error2 and error1!=-1) or error2==-1: res = res1
+                elif (error2 < error1 and error2 !=-1) or error1==-1: res = res2
+
+                if len(other) == 1: other = []
+                else: other = other[0:i] + other[i + 1:]
+
+                booli = True
+                break
+    all_final.append(res)
+    return all_final
 
