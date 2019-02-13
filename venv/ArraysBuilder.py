@@ -3,7 +3,7 @@ import random
 import MuscleRunner
 import numpy as np
 
-#this function sample random index and put string[ind:ind+const] in arr
+#this function sample random index and put string[ind-constlen/2:ind+const/2] in arr
 def randomSample_constLen(string, parts=0, constlen=0):
     arr=[]; strlen=len(string);
     if constlen<1: constlen=int(constlen*strlen);
@@ -20,7 +20,6 @@ def createString(length):# string creation
 
 #make flips on 2-dim array with probability=probToFlip
 def flipsOnArr(arr,probToFlip):
-
     arr=list(arr)
     for x in range(len(arr)):
         for i in range(len(arr[x])):

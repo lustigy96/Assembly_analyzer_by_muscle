@@ -126,7 +126,7 @@ def is_substring_one2zero(sub, st,prob2flip):
             return True, s
     return False,-1
 
-#count errors between s1, s2
+#count errors (diffrence) between s1, s2
 def caunt_error_val(s1,s2):
     #return sum(1 for s, r in zip(s1,s2) if s != r)
     a, b=np.array(list(s1[:min(len(s1),len(s2))])), np.array(list(s2[:min(len(s1),len(s2))]))
@@ -178,7 +178,7 @@ def my_merger(substrings,minOverlap_bits,prob2flip,sourceLen,constlen):
     return all_final
 
 #put arr in muscle and merge the output
-# USES: merge_mus_all_output
+# USES: merge_mus_all_output- UNUSED
 def mus_all(arr,f_strings):
     results=MuscleRunner.muscleCall(arr)
     f_strings.write("final by muscle:\n")
@@ -187,7 +187,7 @@ def mus_all(arr,f_strings):
     f_strings.write(res_all+"\n\n")
     for r in results: f_strings.write(''.join(r)+"\n")
 
-#used to merge the output of muscle - for a lot of strings
+#used to merge the output of muscle - for a lot of strings - UNUSED
 def merge_mus_all_output(arr):#calc the final string out of samples in arr, fix: 1 to 0
     length=[]; res=[]; i=-1
     for line in arr: length.append(len(line))

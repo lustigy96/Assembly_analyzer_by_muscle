@@ -50,7 +50,7 @@ def muscleCall(arr):
     fasta_file.close()
     return fasta_res
 
-#now, calc only flips
+#now, calc only flips - unsused
 def calc_err_bestfit(source, st):
     min_ind = -1
     if len(st)>len(source):

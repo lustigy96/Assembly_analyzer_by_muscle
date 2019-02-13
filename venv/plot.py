@@ -17,7 +17,7 @@ def cat_array(arr,mul): #cat the whole array to itself #mul times. (lenarray ---
         res+=arr
     return res
 
-def flat_arr(arr):
+def flat_arr(arr):#flatten 2 dimentional array
     res=[]
     for x in arr: res+=x
     return res
@@ -39,6 +39,7 @@ def py_plotAll(data_arr,g_ind,graph_title, xlabel, ylabel, zlable,scatter,hist):
     dz = flat_arr(data_arr["Z"])
     # dz=data_arr["Z"]
 
+    #debug
     print len(dx)
     print len(dy)
     print len(dz)

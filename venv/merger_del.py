@@ -283,3 +283,6 @@ def my_merge(arr,prob2del):
     all_final.append(res)
     return all_final
 
+def check ():
+    x=1
+    
